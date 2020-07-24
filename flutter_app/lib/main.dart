@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,9 +7,6 @@ import 'package:flutter/services.dart';
 void main() {
   runApp(MyApp());
 }
-
-
-
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -15,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Calcular IMC',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Primeiro Flutter App'),
@@ -33,33 +32,63 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   double _imcResult = 0;
+  String texto = "";
+  Color _corTexto = Colors.grey;
   TextEditingController pesoController = TextEditingController();
   TextEditingController alturaController = TextEditingController();
+  double roundDouble(double value, int places){
+    double mod = pow(10.0, places);
+    return ((value * mod).round().toDouble() / mod);
+  }
+
+  
   void _calcularImc(){
     setState(() {
-      _imcResult =double.parse(pesoController.text)/( double.parse(alturaController.text)*double.parse(alturaController.text));
-    
+      _imcResult = double.parse(pesoController.text) /
+          (double.parse(alturaController.text) *
+              double.parse(alturaController.text));
+      if (_imcResult <= 17){
+        texto = "Muito Abaixo do Peso";
+        _corTexto = Colors.green;
+      }else if(_imcResult > 17  && _imcResult < 18.5){
+        texto = "Abaixo do peso";
+        _corTexto = Colors.tealAccent;
+      }else if(_imcResult >= 18.5  && _imcResult < 25){
+        texto = "Peso normal";
+        _corTexto = Colors.lightBlue;
+      }else if(_imcResult >= 25 && _imcResult < 30){
+        texto = "Sobrepeso";
+        _corTexto = Colors.orange;
+      }
+      else if(_imcResult >= 30 && _imcResult < 35){
+        texto = "Obesidade I";
+        _corTexto = Colors.deepOrange;
+      }else if(_imcResult >= 35 && _imcResult < 40){
+        texto = "Obesidade II";
+        _corTexto = Colors.red;
+      }else if(_imcResult >= 40){
+        texto = "Obesidade Mórbida";
+        _corTexto = Colors.black;
+      }
+      _imcResult = roundDouble( _imcResult,2);
+      FocusScope.of(context).unfocus();
     });
-
 
   }
 
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
+
         title: Text(widget.title),
       ),
-      body: Column(
+      body:
+      SingleChildScrollView(
+      child:
+      Column(
           children: <Widget>[
             Icon(Icons.person_outline,size:120, color: Colors.green),
             
@@ -89,14 +118,13 @@ class _MyHomePageState extends State<MyHomePage> {
             TextField(keyboardType: TextInputType.number,
                 controller: alturaController,
                 decoration: InputDecoration(
-
                 border: new OutlineInputBorder(
                     borderSide: new BorderSide(color: Colors.teal)
                 ),
 
-                labelText: 'Altura',
-                prefixIcon: const Icon(Icons.arrow_upward, color: Colors.green,),
-                prefixText: ' ',
+              labelText: 'Altura',
+                 prefixIcon: const Icon(Icons.arrow_upward, color: Colors.green,),
+              prefixText: ' ',
                 suffixText: 'Metros',
                 suffixStyle: const TextStyle(color: Colors.green)
             ))
@@ -114,16 +142,27 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),),
               ),
             ),
-            Padding(
+            SingleChildScrollView(
               padding: EdgeInsets.all(20),
-              child: Text(
-                "IMC: $_imcResult",
+              child :
+              Column(
+                children: <Widget> [
+                  Text(
+                    "Seu IMC está em: $_imcResult",
+                  ),
+                  Text(
+                    texto,
+                    style: TextStyle(color: _corTexto , fontSize: 30),
+                  ),
+                ],
               ),
+
             )
 
         ]
       )
 
+    )
     );
   }
 }
